@@ -1,12 +1,10 @@
 "use client";
 import React, { createContext, useState, useEffect } from "react";
-import { ethers } from "ethers";
 import { contractAbi, contractAddress } from "./utils/constants";
 import toast from "react-hot-toast";
+import { ethers } from "ethers";
 
 export const TransactionContext = createContext();
-
-const { ethereum } = window;
 
 export const TransactionProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -16,15 +14,19 @@ export const TransactionProvider = ({ children }) => {
   const [winners, setWinners] = useState({ first: "", second: "", third: "" });
 
   const connectWallet = async () => {
-    try {
-      if (!ethereum) return alert("Please install MetaMask!");
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setCurrentAccount(accounts[0]);
-    } catch (error) {
-      console.error("Wallet connection failed", error);
-      throw new Error("No ethereum account found");
+    if (typeof window !== "undefined" && window.ethereum) {
+      try {
+        const { ethereum } = window;
+        if (!ethereum) return alert("Please install MetaMask!");
+
+        const accounts = await ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setCurrentAccount(accounts[0]);
+      } catch (error) {
+        console.error("Wallet connection failed", error);
+        throw new Error("No Ethereum account found");
+      }
     }
   };
 
@@ -46,13 +48,18 @@ export const TransactionProvider = ({ children }) => {
 
   const sendTransaction = async () => {
     try {
-      const provider = new ethers.providers.Web3Provider(ethereum);
+      const { ethereum } = window;
+      if (!ethereum)
+        return alert("MetaMask is required to complete this action.");
+
+      const provider = new ethers.BrowserProvider(ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
         contractAddress,
         contractAbi,
         signer
       );
+
       const tx = await contract.buyTicket({
         value: ethers.utils.parseEther("0.005"),
       });
@@ -62,6 +69,16 @@ export const TransactionProvider = ({ children }) => {
       toast.error("Transaction failed");
       console.error("Transaction error:", error);
     }
+  };
+
+  const createEthereumContract = () => {
+    const { ethereum } = window;
+    if (ethereum) {
+      const provider = new ethers.BrowserProvider(ethereum);
+      const signer = provider.getSigner();
+      return new ethers.Contract(contractAddress, contractAbi, signer);
+    }
+    return null;
   };
 
   const fetchParticipants = async () => {
@@ -158,6 +175,7 @@ export const TransactionProvider = ({ children }) => {
 
   useEffect(() => {
     const init = async () => {
+      const { ethereum } = window;
       if (ethereum) {
         const accounts = await ethereum.request({ method: "eth_accounts" });
         if (accounts.length) setCurrentAccount(accounts[0]);
