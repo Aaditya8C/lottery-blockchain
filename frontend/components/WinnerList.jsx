@@ -30,8 +30,7 @@ const WinnerList = ({ participants }) => {
         <TableHead>
           <TableRow>
             <TableCell>Account Address</TableCell>
-            <TableCell align="center">Allotted</TableCell>
-            <TableCell align="center">Claim</TableCell>
+            <TableCell align="center">Price</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -40,34 +39,7 @@ const WinnerList = ({ participants }) => {
               <TableCell component="th" scope="row">
                 {participant.address}
               </TableCell>
-              <TableCell align="center">
-                {" "}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {participant.allotted ? (
-                    <Check color="green" />
-                  ) : (
-                    <X color="red" />
-                  )}
-                </div>
-              </TableCell>
-              <TableCell align="center">
-                {participant.claimStatus === "Claim" ? (
-                  <button
-                    onClick={() => handleClaim(participant.address)}
-                    className="text-blue-600"
-                  >
-                    Claim Prize
-                  </button>
-                ) : (
-                  "Not Claimed"
-                )}
-              </TableCell>
+              <TableCell align="center">0.05 ETH</TableCell>
             </TableRow>
           ))}
         </TableBody>
