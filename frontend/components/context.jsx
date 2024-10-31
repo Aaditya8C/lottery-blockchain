@@ -1,192 +1,94 @@
 "use client";
+import React, { createContext, useState, useEffect } from "react";
 import { ethers } from "ethers";
-import React, { createContext, ReactNode, useEffect, useState } from "react";
-import { contractAbi, contractAddress } from "../utils/constants";
-import { getCookie, setCookie } from "cookies-next";
+import { contractAbi, contractAddress } from "./utils/constants";
 import toast from "react-hot-toast";
+
+export const TransactionContext = createContext();
 
 const { ethereum } = window;
 
 export const TransactionProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState("");
-  const [receiverAddress, setReceiverAddress] = useState("");
-  const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
-  const [userTransactions, setUserTransactions] = useState([]);
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const isWalletConnected = async () => {
-    try {
-      if (!ethereum) {
-        return alert("Please install metamask!!");
-      }
-
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      if (accounts.length) {
-        setCurrentAccount(accounts[0]);
-        fetchTransactions();
-      } else {
-        console.log("Noo Accounts found");
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [participants, setParticipants] = useState([]);
 
   const connectWallet = async () => {
     try {
-      if (!ethereum) {
-        return alert("Please install metamask!!");
-      }
+      if (!ethereum) return alert("Please install MetaMask!");
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
       setCurrentAccount(accounts[0]);
-      window.location.reload();
     } catch (error) {
-      console.log(error);
+      console.error("Wallet connection failed", error);
       throw new Error("No ethereum account found");
-    }
-  };
-
-  const createEthereumContract = async () => {
-    const provider = new ethers.BrowserProvider(ethereum);
-    const signer = await provider.getSigner();
-    const transactionContract = new ethers.Contract(
-      contractAddress,
-      contractAbi,
-      signer
-    );
-
-    return transactionContract;
-  };
-
-  const isTransactionExists = async () => {
-    try {
-      if (ethereum) {
-        const transactionContract = await createEthereumContract();
-
-        const currentTransactionCount =
-          await transactionContract.getTransactionsCount();
-        console.log("currentTransactionCount", currentTransactionCount);
-        setCookie("TxCount", currentTransactionCount);
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
   const sendTransaction = async () => {
     try {
-      if (ethereum) {
-        const transactionContract = await createEthereumContract();
-        console.log(transactionContract, "transactionContract created");
-        const parsedAmount = ethers.parseEther(amount);
-
-        console.log(currentAccount, receiverAddress, parsedAmount);
-
-        await ethereum.request({
-          method: "eth_sendTransaction",
-          params: [
-            {
-              from: currentAccount,
-              to: receiverAddress,
-              gas: "0x5208",
-              value: parsedAmount.toString(),
-            },
-          ],
-        });
-
-        const transactionHash = await transactionContract.addTransaction(
-          receiverAddress,
-          parsedAmount,
-          message
-        );
-        setIsLoading(true);
-        console.log("Loading.......");
-        await transactionHash.wait();
-        console.log("Sucesss");
-        setIsLoading(false);
-
-        const transactionCount =
-          await transactionContract.getTransactionsCount();
-        setTransactionCount(Number(transactionCount));
-        // window.location.reload();
-      } else {
-        console.log("No Ethereum Object Founc");
-      }
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractAbi,
+        signer
+      );
+      const tx = await contract.buyTicket({
+        value: ethers.utils.parseEther("0.0001"),
+      });
+      await tx.wait();
+      toast.success("Ticket purchased successfully!");
     } catch (error) {
-      toast.error(error.message);
-      console.log(error);
+      toast.error("Transaction failed");
+      console.error("Transaction error:", error);
     }
   };
 
-  const fetchTransactions = async () => {
+  const fetchParticipants = async () => {
     try {
       if (ethereum) {
         const transactionContract = await createEthereumContract();
-        const availableTransactions =
-          await transactionContract.getAllTransactions();
 
-        const formattedTransactions = availableTransactions.map(
-          (transaction) => {
-            const timestampInMilliseconds = Number(transaction[4]) * 1000;
-            const date = new Date(timestampInMilliseconds);
-            console.log(transaction);
-            return {
-              senderAddress: transaction[0],
-              receiverAddress: transaction[1],
-              amount: parseInt(transaction[2].toString(), 10) / 10 ** 18,
-              message: transaction[3],
-              timestamp: timeAgo.format(date, "mini"),
-            };
-          }
-        );
+        // Fetch participants and winner
+        const participants = await transactionContract.getParticipants();
+        const winner = await transactionContract.getWinner();
 
-        setUserTransactions(formattedTransactions);
-      } else {
-        console.log("No Ethereum Object Founc");
+        // Format participants data with allotted flag
+        const formattedParticipants = participants.map((address) => ({
+          address,
+          allotted: address.toLowerCase() === winner.toLowerCase(), // Check if the participant is the winner
+          claimStatus:
+            address.toLowerCase() === winner.toLowerCase()
+              ? "Claim"
+              : "Not Claimed", // Set claim status based on winner
+        }));
+
+        setParticipants(formattedParticipants);
       }
     } catch (error) {
-      toast.error(error.message);
-      console.log(error);
+      console.log("Error fetching participants", error);
     }
   };
 
   useEffect(() => {
-    isWalletConnected();
-    isTransactionExists();
-  }, [transactionCount]);
-
-  useEffect(() => {
-    window.ethereum.on("chainChanged", () => {
-      window.location.reload();
-    });
-
-    window.ethereum.on("accountsChanged", () => {
-      window.location.reload();
-    });
+    const init = async () => {
+      if (ethereum) {
+        const accounts = await ethereum.request({ method: "eth_accounts" });
+        if (accounts.length) setCurrentAccount(accounts[0]);
+      }
+    };
+    init();
   }, []);
 
   return (
     <TransactionContext.Provider
       value={{
-        setAmount,
-        setMessage,
         connectWallet,
         sendTransaction,
-        setReceiverAddress,
-        fetchTransactions,
         currentAccount,
-        receiverAddress,
-        amount,
-        message,
-        isLoading,
-        userTransactions,
+        participants,
+        fetchParticipants,
       }}
     >
       {children}

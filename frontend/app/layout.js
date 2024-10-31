@@ -1,5 +1,6 @@
 import localFont from "next/font/local";
 import "./globals.css";
+import { TransactionProvider } from "@/components/context";
 // import { TransactionProvider } from "@/components/context";
 
 const geistSans = localFont({
@@ -21,13 +22,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      {/* <TransactionProvider> */}
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-      {/* </TransactionProvider> */}
+      <TransactionProvider>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </TransactionProvider>
     </html>
   );
 }

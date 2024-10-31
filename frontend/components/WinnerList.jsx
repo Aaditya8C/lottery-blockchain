@@ -1,4 +1,6 @@
-import * as React from "react";
+"use client";
+import React, { useContext, useEffect } from "react";
+import { TransactionContext } from "./context";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -6,19 +8,15 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { Check, X } from "lucide-react";
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
+const WinnerList = ({ participants }) => {
+  const handleClaim = async (address) => {
+    // Logic to handle claiming the prize
+    // This might involve calling a contract function to transfer the winnings
+    // For example: await contract.claimPrize(address);
+  };
 
-const rows = [
-  createData("Frozen yoghurt", 1, 2),
-  createData("Ice cream sandwich", 2, 2),
-  createData("Eclair", 2, 2),
-  createData("Cupcake", 3, 3),
-  createData("Gingerbread", 3, 3),
-];
-const WinnerList = () => {
   return (
     <TableContainer
       component={Paper}
@@ -32,21 +30,44 @@ const WinnerList = () => {
         <TableHead>
           <TableRow>
             <TableCell>Account Address</TableCell>
-            <TableCell align="right">Allotted</TableCell>
-            <TableCell align="right">Claim</TableCell>
+            <TableCell align="center">Allotted</TableCell>
+            <TableCell align="center">Claim</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow
-              key={row.name}
-              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-            >
+          {participants.map((participant) => (
+            <TableRow key={participant.address}>
               <TableCell component="th" scope="row">
-                {row.name}
+                {participant.address}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
+              <TableCell align="center">
+                {" "}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  {participant.allotted ? (
+                    <Check color="green" />
+                  ) : (
+                    <X color="red" />
+                  )}
+                </div>
+              </TableCell>
+              <TableCell align="center">
+                {participant.claimStatus === "Claim" ? (
+                  <button
+                    onClick={() => handleClaim(participant.address)}
+                    className="text-blue-600"
+                  >
+                    Claim Prize
+                  </button>
+                ) : (
+                  "Not Claimed"
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

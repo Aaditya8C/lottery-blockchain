@@ -32,6 +32,10 @@ contract Lottery {
         emit TicketPurchased(msg.sender);
     }
 
+    function getWinner() public view returns (address) {
+        return winner;
+    }
+
     function pickWinner() internal view returns (address) {
         require(participants.length > 0, "No participants in the lottery");
         uint randomIndex = uint(
