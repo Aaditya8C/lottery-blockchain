@@ -2,10 +2,13 @@
 import React, { useContext, useEffect } from "react";
 import animationData from "../public/lottery.json";
 import Lottie from "react-lottie";
-import WinnerList from "./WinnerList";
+import WinnerList from "./Participants";
 import { TransactionContext } from "./context";
 import { ethers } from "ethers";
 import { contractAddress, contractAbi } from "./utils/constants";
+import Participants from "./Participants";
+import Winners from "./Winners";
+import { useWinnerStore } from "@/store/winnerStore";
 
 const Landing = () => {
   const context = useContext(TransactionContext);
@@ -19,9 +22,6 @@ const Landing = () => {
     fetchContractDetails,
     isOwner,
     isLotteryOpen,
-    setIsLotteryOpen,
-    winners,
-    setWinners,
     revealWinners,
     openLottery,
     closeLottery,
@@ -45,8 +45,8 @@ const Landing = () => {
   useEffect(() => {
     fetchParticipants();
   }, [participants]);
-  console.log(winners);
   useEffect(() => {}, [isLotteryOpen]);
+  const { winners, setWinners } = useWinnerStore();
   return (
     <div>
       <div className="p-6 flex items-center justify-between shadow-xl px-28">
@@ -102,7 +102,10 @@ const Landing = () => {
             )}
             {isOwner && (
               <button
-                onClick={closeLottery} // Close lottery button
+                onClick={() => {
+                  closeLottery();
+                  setWinners({ first: "", second: "", third: "" });
+                }} // Close lottery button
                 className="text-white bg-yellow-500 font-semibold px-10 py-3 rounded-md hover:bg-yellow-600 transition-all duration-200"
               >
                 Close Lottery
@@ -114,12 +117,10 @@ const Landing = () => {
 
       {isLotteryOpen && (
         <>
-          <WinnerList participants={participants} />
+          <p className="text-xl font-semibold text-center">Participants</p>
+          <Participants participants={participants} />
           <div className="mt-6 text-center">
-            <h2 className="text-xl font-bold">Top 3 Winners</h2>
-            <p className="mt-2">1st: {winners.first}</p>
-            <p>2nd: {winners.second}</p>
-            <p>3rd: {winners.third}</p>
+            <Winners winners={winners} />
           </div>
         </>
       )}

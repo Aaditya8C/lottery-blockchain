@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect } from "react";
 import { contractAbi, contractAddress } from "./utils/constants";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
+import { useWinnerStore } from "@/store/winnerStore";
 
 export const TransactionContext = createContext();
 
@@ -11,7 +12,7 @@ export const TransactionProvider = ({ children }) => {
   const [participants, setParticipants] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [isLotteryOpen, setIsLotteryOpen] = useState(false);
-  const [winners, setWinners] = useState({ first: "", second: "", third: "" });
+  const { setWinners } = useWinnerStore();
 
   const connectWallet = async () => {
     if (typeof window !== "undefined" && window.ethereum) {
@@ -52,7 +53,7 @@ export const TransactionProvider = ({ children }) => {
       if (!ethereum)
         return alert("MetaMask is required to complete this action.");
 
-      const provider = new ethers.BrowserProvider(ethereum);
+      const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
         contractAddress,
@@ -74,7 +75,7 @@ export const TransactionProvider = ({ children }) => {
   const createEthereumContract = () => {
     const { ethereum } = window;
     if (ethereum) {
-      const provider = new ethers.BrowserProvider(ethereum);
+      const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
       return new ethers.Contract(contractAddress, contractAbi, signer);
     }
@@ -144,7 +145,7 @@ export const TransactionProvider = ({ children }) => {
       const second = await contract.secondWinner();
       const third = await contract.thirdWinner();
 
-      console.log(first, second, third);
+      // console.log(first, second, third);
 
       setWinners({ first, second, third });
 
@@ -177,6 +178,13 @@ export const TransactionProvider = ({ children }) => {
     const init = async () => {
       const { ethereum } = window;
       if (ethereum) {
+        window.ethereum.on("chainChanged", () => {
+          window.location.reload();
+        });
+
+        window.ethereum.on("accountsChanged", () => {
+          window.location.reload();
+        });
         const accounts = await ethereum.request({ method: "eth_accounts" });
         if (accounts.length) setCurrentAccount(accounts[0]);
       }
@@ -200,8 +208,6 @@ export const TransactionProvider = ({ children }) => {
         setIsOwner,
         setParticipants,
         openLottery,
-        winners,
-        setWinners,
         revealWinners,
         closeLottery,
       }}

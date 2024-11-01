@@ -1,6 +1,4 @@
 "use client";
-import React, { useContext, useEffect } from "react";
-import { TransactionContext } from "./context";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -8,15 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { Check, X } from "lucide-react";
-
-const WinnerList = ({ participants }) => {
-  const handleClaim = async (address) => {
-    // Logic to handle claiming the prize
-    // This might involve calling a contract function to transfer the winnings
-    // For example: await contract.claimPrize(address);
-  };
-
+const Participants = ({ participants }) => {
   return (
     <TableContainer
       component={Paper}
@@ -48,4 +38,4 @@ const WinnerList = ({ participants }) => {
   );
 };
 
-export default WinnerList;
+export default Participants;
