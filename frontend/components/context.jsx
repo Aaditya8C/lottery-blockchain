@@ -61,7 +61,8 @@ export const TransactionProvider = ({ children }) => {
         signer
       );
 
-      const tx = await contract.buyTicket({
+      const name = localStorage.getItem("userName");
+      const tx = await contract.buyTicket(name, {
         value: ethers.utils.parseEther("0.005"),
       });
       await tx.wait();
@@ -84,7 +85,7 @@ export const TransactionProvider = ({ children }) => {
 
   const fetchParticipants = async () => {
     try {
-      const provider = new ethers.providers.Web3Provider(ethereum);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const contract = new ethers.Contract(
         contractAddress,
@@ -92,11 +93,13 @@ export const TransactionProvider = ({ children }) => {
         signer
       );
 
-      const participants = await contract.getParticipants();
+      const participantData = await contract.getParticipants();
 
       setParticipants(
-        participants.map((address) => ({
+        participantData[0].map((address, index) => ({
           address,
+          name: participantData[1][index],
+          amountSpent: ethers.utils.formatEther(participantData[2][index]),
           allotted: false,
           claimStatus: "Not Claimed",
         }))
@@ -108,7 +111,6 @@ export const TransactionProvider = ({ children }) => {
     }
   };
 
-  // Open lottery function for the owner
   const openLottery = async () => {
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -123,8 +125,10 @@ export const TransactionProvider = ({ children }) => {
       await tx.wait();
 
       setIsLotteryOpen(true);
+      toast.success("Lottery opened successfully!");
     } catch (error) {
       console.error("Failed to open the lottery:", error);
+      toast.error("Failed to open the lottery.");
     }
   };
 
@@ -141,17 +145,37 @@ export const TransactionProvider = ({ children }) => {
       const tx = await contract.revealWinners();
       await tx.wait();
 
-      const first = await contract.firstWinner();
-      const second = await contract.secondWinner();
-      const third = await contract.thirdWinner();
+      const {
+        0: first,
+        1: firstName,
+        2: firstAmount,
+        3: second,
+        4: secondName,
+        5: secondAmount,
+        6: third,
+        7: thirdName,
+        8: thirdAmount,
+      } = await contract.getWinnerDetails();
 
-      // console.log(first, second, third);
+      const firstAmountInEth = ethers.utils.formatEther(firstAmount);
+      const secondAmountInEth = ethers.utils.formatEther(secondAmount);
+      const thirdAmountInEth = ethers.utils.formatEther(thirdAmount);
 
-      setWinners({ first, second, third });
+      setWinners({
+        first: { address: first, name: firstName, amount: firstAmountInEth },
+        second: {
+          address: second,
+          name: secondName,
+          amount: secondAmountInEth,
+        },
+        third: { address: third, name: thirdName, amount: thirdAmountInEth },
+      });
 
       fetchParticipants();
+      toast.success("Winners revealed successfully!");
     } catch (error) {
       console.error("Failed to reveal winners:", error);
+      toast.error("Failed to reveal winners.");
     }
   };
 
@@ -169,8 +193,10 @@ export const TransactionProvider = ({ children }) => {
       await tx.wait();
 
       setIsLotteryOpen(false);
+      toast.success("Lottery closed successfully!");
     } catch (error) {
       console.error("Failed to close the lottery:", error);
+      toast.error("Failed to close the lottery.");
     }
   };
 
@@ -200,7 +226,6 @@ export const TransactionProvider = ({ children }) => {
         currentAccount,
         participants,
         fetchParticipants,
-        participants,
         fetchContractDetails,
         isOwner,
         isLotteryOpen,

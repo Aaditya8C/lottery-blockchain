@@ -6,7 +6,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+
 const Participants = ({ participants }) => {
+  console.log(participants);
   return (
     <TableContainer
       component={Paper}
@@ -16,22 +18,35 @@ const Participants = ({ participants }) => {
         padding: "30px 0",
       }}
     >
-      <Table sx={{ minWidth: 650, maxWidth: 1000 }} aria-label="simple table">
+      <Table
+        sx={{ minWidth: 650, maxWidth: 1000 }}
+        aria-label="participants table"
+      >
         <TableHead>
           <TableRow>
             <TableCell>Account Address</TableCell>
-            <TableCell align="center">Price</TableCell>
+            <TableCell align="center">Name</TableCell>
+            <TableCell align="center">Amount Spent (ETH)</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {participants.map((participant) => (
-            <TableRow key={participant.address}>
-              <TableCell component="th" scope="row">
-                {participant.address}
+          {participants && participants.length > 0 ? (
+            participants.map((participant) => (
+              <TableRow key={participant.address}>
+                <TableCell component="th" scope="row">
+                  {participant.address}
+                </TableCell>
+                <TableCell align="center">{participant.name}</TableCell>
+                <TableCell align="center">{participant.amountSpent}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} align="center">
+                No participants found
               </TableCell>
-              <TableCell align="center">0.005 ETH</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </TableContainer>
