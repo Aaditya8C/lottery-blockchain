@@ -29,7 +29,7 @@ const Participants = ({ participants }) => {
               <TableCell component="th" scope="row">
                 {participant.address}
               </TableCell>
-              <TableCell align="center">0.05 ETH</TableCell>
+              <TableCell align="center">0.005 ETH</TableCell>
             </TableRow>
           ))}
         </TableBody>
