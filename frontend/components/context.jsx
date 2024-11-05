@@ -312,6 +312,7 @@ export const TransactionProvider = ({ children }) => {
         revealWinners,
         closeLottery,
         participantCount,
+        getParticipantCount,
         getWinner,
         isLoading, // Include isLoading in context value
       }}

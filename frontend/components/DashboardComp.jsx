@@ -54,6 +54,7 @@ const DashboardComp = () => {
     openLottery,
     closeLottery,
     participantCount,
+    getParticipantCount,
   } = useContext(TransactionContext);
 
   const { setWinners } = useWinnerStore();
@@ -64,6 +65,10 @@ const DashboardComp = () => {
       fetchContractDetails();
     }
   }, [currentAccount, fetchContractDetails]);
+
+  useEffect(() => {
+    getParticipantCount();
+  }, [participantCount]);
 
   return (
     <div>
