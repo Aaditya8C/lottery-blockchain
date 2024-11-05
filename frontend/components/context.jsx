@@ -12,9 +12,12 @@ export const TransactionProvider = ({ children }) => {
   const [participants, setParticipants] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [isLotteryOpen, setIsLotteryOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // New isLoading state
+  const [participantCount, setParticipantCount] = useState("0");
   const { setWinners } = useWinnerStore();
 
   const connectWallet = async () => {
+    setIsLoading(true); // Set loading true
     if (typeof window !== "undefined" && window.ethereum) {
       try {
         const { ethereum } = window;
@@ -24,30 +27,43 @@ export const TransactionProvider = ({ children }) => {
           method: "eth_requestAccounts",
         });
         setCurrentAccount(accounts[0]);
+        toast.success("Wallet Connected Successfully");
       } catch (error) {
         console.error("Wallet connection failed", error);
+        toast.error("Unable to connect the wallet");
         throw new Error("No Ethereum account found");
+      } finally {
+        setIsLoading(false); // Set loading false
       }
     }
   };
 
   const fetchContractDetails = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+    setIsLoading(true); // Set loading true
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractAbi,
+        signer
+      );
 
-    const contractOwner = await contract.owner();
-    setIsOwner(contractOwner.toLowerCase() === currentAccount.toLowerCase());
+      const contractOwner = await contract.owner();
+      setIsOwner(contractOwner.toLowerCase() === currentAccount.toLowerCase());
 
-    const lotteryStatus = await contract.isLotteryOpen();
-    setIsLotteryOpen(lotteryStatus);
+      const lotteryStatus = await contract.isLotteryOpen();
+      setIsLotteryOpen(lotteryStatus);
+    } catch (error) {
+      console.error("Error fetching contract details:", error);
+      toast.error("Failed to fetch contract details");
+    } finally {
+      setIsLoading(false); // Set loading false
+    }
   };
 
-  if (currentAccount) {
-    fetchContractDetails();
-  }
-
   const sendTransaction = async () => {
+    // setIsLoading(true); // Set loading true
     try {
       const { ethereum } = window;
       if (!ethereum)
@@ -66,21 +82,13 @@ export const TransactionProvider = ({ children }) => {
         value: ethers.utils.parseEther("0.005"),
       });
       await tx.wait();
+      getParticipantCount();
+      // setIsLoading(false); // Set loading false
       toast.success("Ticket purchased successfully!");
     } catch (error) {
       toast.error("Transaction failed");
       console.error("Transaction error:", error);
     }
-  };
-
-  const createEthereumContract = () => {
-    const { ethereum } = window;
-    if (ethereum) {
-      const provider = new ethers.providers.Web3Provider(ethereum);
-      const signer = provider.getSigner();
-      return new ethers.Contract(contractAddress, contractAbi, signer);
-    }
-    return null;
   };
 
   const fetchParticipants = async () => {
@@ -104,7 +112,8 @@ export const TransactionProvider = ({ children }) => {
           claimStatus: "Not Claimed",
         }))
       );
-      toast.success("Participants fetched successfully!");
+      // console.log("Connected");
+      // toast.success("Participants fetched successfully!");
     } catch (error) {
       toast.error("Failed to fetch participants");
       console.error("Error fetching participants:", error);
@@ -120,7 +129,6 @@ export const TransactionProvider = ({ children }) => {
         contractAbi,
         signer
       );
-
       const tx = await contract.openLottery();
       await tx.wait();
 
@@ -129,6 +137,25 @@ export const TransactionProvider = ({ children }) => {
     } catch (error) {
       console.error("Failed to open the lottery:", error);
       toast.error("Failed to open the lottery.");
+    }
+  };
+  const getParticipantCount = async () => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractAbi,
+        signer
+      );
+
+      const count = await contract.getParticipantsCount();
+      console.log("Count of participants:", count.toString());
+
+      setParticipantCount(count.toString());
+    } catch (error) {
+      console.error("Failed to get the count of participants:", error);
+      toast.error("Failed to get the count of participants.");
     }
   };
 
@@ -142,8 +169,11 @@ export const TransactionProvider = ({ children }) => {
         signer
       );
 
+      setIsLoading(true); // Set loading true
+
       const tx = await contract.revealWinners();
       await tx.wait();
+      setIsLoading(false); // Set loading false
 
       const {
         0: first,
@@ -188,9 +218,9 @@ export const TransactionProvider = ({ children }) => {
         contractAbi,
         signer
       );
-
       const tx = await contract.closeLottery();
       await tx.wait();
+      localStorage.removeItem("userName");
 
       setIsLotteryOpen(false);
       toast.success("Lottery closed successfully!");
@@ -235,6 +265,8 @@ export const TransactionProvider = ({ children }) => {
         openLottery,
         revealWinners,
         closeLottery,
+        participantCount,
+        isLoading, // Include isLoading in context value
       }}
     >
       {children}

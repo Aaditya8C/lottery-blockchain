@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import PopupContainer from "./PopupContainer";
+import { useRouter } from "next/navigation";
 
 const Modal = ({ setIsModalOpen, connectWallet }) => {
   const [name, setName] = useState("");
+  const router = useRouter();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -11,6 +13,7 @@ const Modal = ({ setIsModalOpen, connectWallet }) => {
       connectWallet(); // Call the connectWallet function
       // onClose(); // Close the modal
       setIsModalOpen(false);
+      router.push("/dashboard");
     }
   };
 
@@ -23,7 +26,7 @@ const Modal = ({ setIsModalOpen, connectWallet }) => {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="border p-2 rounded w-full mb-4"
+            className="border p-2 rounded w-full mb-4 text-black"
             placeholder="Your Name"
             required
           />
