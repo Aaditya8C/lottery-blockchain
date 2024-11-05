@@ -66,7 +66,7 @@ const Winners = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-center mb-6 text-orange-200 mt-20">
+      <h2 className="text-5xl font-bold text-center mb-6 text-orange-200 mt-20">
         Top 3 Winners
       </h2>
       <div className="overflow-x-auto">
