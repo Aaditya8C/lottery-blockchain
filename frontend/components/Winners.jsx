@@ -55,7 +55,7 @@ const Winners = () => {
     {
       place: "2nd",
       details: winners.second,
-      icon: <Medal className="text-gray-600" />,
+      icon: <Medal className="text-gray-200" />,
     },
     {
       place: "3rd",
@@ -83,7 +83,7 @@ const Winners = () => {
                 Address
               </th>
               <th className="px-6 py-3 text-center border-b border-cyan-800 text-cyan-400 font-semibold text-lg">
-                Amount (Eth)
+                Amount (Rupees)
               </th>
             </tr>
           </thead>
@@ -105,7 +105,7 @@ const Winners = () => {
                     {position.details.address}
                   </td>
                   <td className="px-6 py-4 text-center text-lg font-medium text-blue-200">
-                    {position.details.amount} ETH
+                    ₹ {position.details.amount * 215232}
                   </td>
                 </tr>
               ))
