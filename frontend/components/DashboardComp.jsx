@@ -1,18 +1,14 @@
 "use client";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import animationData from "../public/lottery.json";
 import Lottie from "react-lottie";
-import WinnerList from "./Participants";
-import { TransactionContext } from "./context";
-import { ethers } from "ethers";
-import { contractAddress, contractAbi } from "./utils/constants";
 import Participants from "./Participants";
 import Winners from "./Winners";
+import { TransactionContext } from "./context";
 import { useWinnerStore } from "@/store/winnerStore";
+import Modal from "./Modal";
 
 const DashboardComp = () => {
-  const context = useContext(TransactionContext);
-
   const {
     connectWallet,
     currentAccount,
@@ -25,8 +21,11 @@ const DashboardComp = () => {
     revealWinners,
     openLottery,
     closeLottery,
-  } = context;
+  } = useContext(TransactionContext);
 
+  const { winners, setWinners } = useWinnerStore();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   // Lottie animation settings
   const defaultOptions = {
     loop: true,
@@ -35,36 +34,47 @@ const DashboardComp = () => {
     rendererSettings: { preserveAspectRatio: "xMidYMid slice" },
   };
 
-  // Fetch contract owner and lottery status
   useEffect(() => {
     if (currentAccount) {
       fetchContractDetails();
     }
-  }, [currentAccount]);
+  }, [currentAccount, fetchContractDetails]);
 
   useEffect(() => {
-    fetchParticipants();
-  }, [participants]);
-  useEffect(() => {}, [isLotteryOpen]);
-  const { winners, setWinners } = useWinnerStore();
+    if (isLotteryOpen) {
+      fetchParticipants();
+    }
+  }, [isLotteryOpen, fetchParticipants]);
+
   return (
     <div>
-      <div className="p-6 flex items-center justify-between shadow-xl px-28">
-        <p className="text-blue-900 font-bold text-2xl">Lottery Dapp</p>
+      <div className="p-6 flex items-center justify-between shadow-xl shadow-cyan-900 px-28 bg-cyan-950">
+        <p className="text-cyan-500 font-bold text-2xl">Maal ka Mela</p>
+        <p className="text-cyan-700 font-bold text-2xl">Winners</p>
         {!currentAccount ? (
-          <button
-            onClick={connectWallet}
-            className="text-white bg-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-blue-600 transition-all duration-200"
-          >
-            Connect Wallet
-          </button>
+          <>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="text-white bg-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-blue-600 transition-all duration-200"
+            >
+              Open Modal
+            </button>
+            {isModalOpen && (
+              <Modal
+                setIsModalOpen={setIsModalOpen}
+                connectWallet={connectWallet}
+              />
+            )}
+          </>
         ) : (
-          <p className="font-semibold">Connected: {currentAccount}</p>
+          <p className="font-semibold text-cyan-500">
+            Welcome: {currentAccount}
+          </p>
         )}
       </div>
 
       <div>
-        <Lottie options={defaultOptions} height={300} width={300} />
+        {/* <Lottie options={defaultOptions} height={300} width={300} /> */}
       </div>
 
       <div className="flex justify-center items-center h-full py-10 gap-10">
@@ -78,7 +88,7 @@ const DashboardComp = () => {
         )}
 
         {!isLotteryOpen && !isOwner && (
-          <p className="text-lg font-semibold">
+          <p className="text-2xl font-semibold text-cyan-500">
             Wait for the lottery to be opened
           </p>
         )}
@@ -105,7 +115,7 @@ const DashboardComp = () => {
                 onClick={() => {
                   closeLottery();
                   setWinners({ first: "", second: "", third: "" });
-                }} // Close lottery button
+                }}
                 className="text-white bg-yellow-500 font-semibold px-10 py-3 rounded-md hover:bg-yellow-600 transition-all duration-200"
               >
                 Close Lottery
@@ -114,16 +124,6 @@ const DashboardComp = () => {
           </>
         )}
       </div>
-
-      {isLotteryOpen && (
-        <>
-          <p className="text-xl font-semibold text-center">Participants</p>
-          <Participants participants={participants} />
-          <div className="mt-6 text-center">
-            <Winners winners={winners} />
-          </div>
-        </>
-      )}
     </div>
   );
 };
