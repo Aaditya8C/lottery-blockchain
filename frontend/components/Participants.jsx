@@ -79,7 +79,7 @@ const Participants = () => {
                 <span className="font-semibold text-cyan-400">
                   Amount Spent:{" "}
                 </span>
-                {p.amountSpent * 215232} ₹
+                ₹ {p.amountSpent * 215232}
               </span>
             </div>
           </div>

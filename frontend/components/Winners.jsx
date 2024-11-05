@@ -1,15 +1,6 @@
 "use client";
 import React, { useContext, useEffect } from "react";
-import { Medal, Trophy } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-} from "@mui/material";
+import { Medal } from "lucide-react";
 import { useWinnerStore } from "@/store/winnerStore";
 import { isEmpty } from "lodash";
 import { TransactionContext } from "./context";
@@ -75,76 +66,62 @@ const Winners = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-center mb-6 text-orange-200">
+      <h2 className="text-2xl font-bold text-center mb-6 text-orange-200 mt-20">
         Top 3 Winners
       </h2>
-      <TableContainer component={Paper} className="shadow-lg rounded-lg ">
-        <Table className="bg-[#04364A]">
-          <TableHead>
-            <TableRow className="bg-cyan-700">
-              <TableCell align="center" className="font-semibold">
-                <span className="text-cyan-400 font-semibold text-lg">
-                  Position
-                </span>
-              </TableCell>
-              <TableCell align="center" className="font-semibold">
-                <span className="text-cyan-400 font-semibold text-lg">
-                  Name
-                </span>
-              </TableCell>
-              <TableCell align="center" className="font-semibold">
-                <span className="text-cyan-400 font-semibold text-lg">
-                  Address
-                </span>
-              </TableCell>
-              <TableCell align="center" className="font-semibold">
-                <span className="text-cyan-400 font-semibold text-lg">
-                  Amount (Eth)
-                </span>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-purple-900 text-white border border-cyan-800 rounded-lg shadow-lg">
+          <thead>
+            <tr className="bg-purple-800">
+              <th className="px-6 py-3 text-center border-b border-cyan-800 text-cyan-400 font-semibold text-lg">
+                Position
+              </th>
+              <th className="px-6 py-3 text-center border-b border-cyan-800 text-cyan-400 font-semibold text-lg">
+                Name
+              </th>
+              <th className="px-6 py-3 text-center border-b border-cyan-800 text-cyan-400 font-semibold text-lg">
+                Address
+              </th>
+              <th className="px-6 py-3 text-center border-b border-cyan-800 text-cyan-400 font-semibold text-lg">
+                Amount (Eth)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
             {!isEmpty(winners) ? (
               positions.map((position, index) => (
-                <TableRow
+                <tr
                   key={index}
-                  className="hover:bg-cyan-600 transition duration-300"
+                  className="hover:bg-purple-700 transition duration-300 border-b border-cyan-800"
                 >
-                  <TableCell
-                    align="center"
-                    className="flex justify-center items-center gap-2 "
-                  >
-                    <span className="animate-pulse">{position.icon} </span>
-                    <span className="font-semibold text-orange-200 text-lg">
-                      {position.place}
-                    </span>
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    className="text-orange-200 font-medium text-lg"
-                  >
+                  <td className="px-6 py-4 text-center flex justify-center items-center gap-2 font-semibold text-lg text-orange-200">
+                    <span className="animate-pulse">{position.icon}</span>
+                    {position.place}
+                  </td>
+                  <td className="px-6 py-4 text-center text-lg font-medium text-orange-200">
                     {position.details.name}
-                  </TableCell>
-                  <TableCell align="center">
-                    <span className="text-orange-200 text-lg">
-                      {position.details.address}
-                    </span>
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    className="text-blue-200 font-medium text-lg"
-                  >
+                  </td>
+                  <td className="px-6 py-4 text-center text-lg text-orange-200">
+                    {position.details.address}
+                  </td>
+                  <td className="px-6 py-4 text-center text-lg font-medium text-blue-200">
                     {position.details.amount} ETH
-                  </TableCell>
-                </TableRow>
+                  </td>
+                </tr>
               ))
             ) : (
-              <p>Winners not revealed yet</p>
+              <tr>
+                <td
+                  colSpan="4"
+                  className="px-6 py-4 text-center text-lg text-orange-200"
+                >
+                  Winners not revealed yet
+                </td>
+              </tr>
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
