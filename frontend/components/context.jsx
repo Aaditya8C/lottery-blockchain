@@ -4,17 +4,19 @@ import { contractAbi, contractAddress } from "./utils/constants";
 import toast from "react-hot-toast";
 import { ethers } from "ethers";
 import { useWinnerStore } from "@/store/winnerStore";
+import useParticipantsStore from "@/store/participantStore";
 
 export const TransactionContext = createContext();
 
 export const TransactionProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState("");
-  const [participants, setParticipants] = useState([]);
+  // const [participants, setParticipants] = useState([]);
   const [isOwner, setIsOwner] = useState(false);
   const [isLotteryOpen, setIsLotteryOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // New isLoading state
   const [participantCount, setParticipantCount] = useState("0");
   const { setWinners } = useWinnerStore();
+  const { participants, setParticipants } = useParticipantsStore();
 
   const connectWallet = async () => {
     setIsLoading(true); // Set loading true
@@ -103,16 +105,16 @@ export const TransactionProvider = ({ children }) => {
 
       const participantData = await contract.getParticipants();
 
-      setParticipants(
-        participantData[0].map((address, index) => ({
-          address,
-          name: participantData[1][index],
-          amountSpent: ethers.utils.formatEther(participantData[2][index]),
-          allotted: false,
-          claimStatus: "Not Claimed",
-        }))
-      );
-      // console.log("Connected");
+      // setParticipants(
+      //   participantData[0].map((address, index) => ({
+      //     address,
+      //     name: participantData[1][index],
+      //     amountSpent: ethers.utils.formatEther(participantData[2][index]),
+      //     allotted: false,
+      //     claimStatus: "Not Claimed",
+      //   }))
+      // );
+      setParticipants(participantData);
       // toast.success("Participants fetched successfully!");
     } catch (error) {
       toast.error("Failed to fetch participants");
@@ -175,6 +177,50 @@ export const TransactionProvider = ({ children }) => {
       await tx.wait();
       setIsLoading(false); // Set loading false
 
+      // const {
+      //   0: first,
+      //   1: firstName,
+      //   2: firstAmount,
+      //   3: second,
+      //   4: secondName,
+      //   5: secondAmount,
+      //   6: third,
+      //   7: thirdName,
+      //   8: thirdAmount,
+      // } = await contract.getWinnerDetails();
+
+      // const firstAmountInEth = ethers.utils.formatEther(firstAmount);
+      // const secondAmountInEth = ethers.utils.formatEther(secondAmount);
+      // const thirdAmountInEth = ethers.utils.formatEther(thirdAmount);
+
+      // setWinners({
+      //   first: { address: first, name: firstName, amount: firstAmountInEth },
+      //   second: {
+      //     address: second,
+      //     name: secondName,
+      //     amount: secondAmountInEth,
+      //   },
+      //   third: { address: third, name: thirdName, amount: thirdAmountInEth },
+      // });
+
+      // fetchParticipants();
+      toast.success("Winners revealed successfully!");
+    } catch (error) {
+      console.error("Failed to reveal winners:", error);
+      toast.error("Failed to reveal winners.");
+    }
+  };
+
+  const getWinner = async () => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(
+        contractAddress,
+        contractAbi,
+        signer
+      );
+
       const {
         0: first,
         1: firstName,
@@ -200,12 +246,9 @@ export const TransactionProvider = ({ children }) => {
         },
         third: { address: third, name: thirdName, amount: thirdAmountInEth },
       });
-
-      fetchParticipants();
-      toast.success("Winners revealed successfully!");
     } catch (error) {
-      console.error("Failed to reveal winners:", error);
-      toast.error("Failed to reveal winners.");
+      console.error("Failed to fetch winners:", error);
+      toast.error("Failed to fetch winners.");
     }
   };
 
@@ -221,6 +264,9 @@ export const TransactionProvider = ({ children }) => {
       const tx = await contract.closeLottery();
       await tx.wait();
       localStorage.removeItem("userName");
+      localStorage.removeItem("timeLeft");
+      localStorage.removeItem("winners-storage");
+      localStorage.removeItem("participants-store");
 
       setIsLotteryOpen(false);
       toast.success("Lottery closed successfully!");
@@ -266,6 +312,7 @@ export const TransactionProvider = ({ children }) => {
         revealWinners,
         closeLottery,
         participantCount,
+        getWinner,
         isLoading, // Include isLoading in context value
       }}
     >

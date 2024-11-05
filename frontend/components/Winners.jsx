@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Medal, Trophy } from "lucide-react";
 import {
   Table,
@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useWinnerStore } from "@/store/winnerStore";
 import { isEmpty } from "lodash";
+import { TransactionContext } from "./context";
 
 // Sample response data from the blockchain
 const blockchainResponse = [
@@ -48,7 +49,11 @@ const parseWinnersData = (data) => {
 };
 
 const Winners = () => {
-  const { winners = parseWinnersData(blockchainResponse) } = useWinnerStore();
+  const { winners } = useWinnerStore();
+  const { getWinner } = useContext(TransactionContext);
+  useEffect(() => {
+    getWinner();
+  }, []);
 
   const positions = [
     {

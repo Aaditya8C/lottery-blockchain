@@ -19,7 +19,7 @@ const Modal = ({ setIsModalOpen, connectWallet }) => {
 
   return (
     <PopupContainer closeBtn setPopup={setIsModalOpen}>
-      <div className="bg-cyan-700 w-[90vw] md:w-[30vw] rounded-md shadow-lg py-8 shadow-cyan-500 lg:px-10 px-4 flex flex-col gap-3">
+      <div className="bg-cyan-700 w-[90vw] md:w-[30vw] rounded-md shadow-lg py-8 lg:px-10 px-4 flex flex-col gap-3">
         <h2 className="text-lg font-bold mb-4 text-white">Enter Your Name</h2>
         <form onSubmit={handleSubmit}>
           <input

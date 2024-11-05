@@ -5,7 +5,7 @@ import { TransactionContext } from "./context";
 import { textShortner } from "./textShortener";
 
 const Navbar = () => {
-  const { currentAccount } = useContext(TransactionContext);
+  const { currentAccount, revealWinners } = useContext(TransactionContext);
   return (
     <div className="p-6 flex items-center justify-between shadow-xl shadow-cyan-900 px-28 bg-cyan-950">
       <Link className="text-cyan-500 font-bold text-xl" href="/dashboard">

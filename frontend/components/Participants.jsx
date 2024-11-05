@@ -1,16 +1,12 @@
 "use client";
 import { useContext, useEffect, useState } from "react";
 import { TransactionContext } from "./context";
-import AmountSpentComponent from "./AmountSpentComp";
+import useParticipantsStore from "@/store/participantStore";
 
 const Participants = () => {
-  const {
-    participants,
-    fetchParticipants,
-    fetchContractDetails,
-    isOwner,
-    isLotteryOpen,
-  } = useContext(TransactionContext);
+  const { fetchParticipants, fetchContractDetails, isOwner, isLotteryOpen } =
+    useContext(TransactionContext);
+  const { participants } = useParticipantsStore();
 
   const [parti, setParti] = useState([
     {
@@ -79,7 +75,12 @@ const Participants = () => {
             </div>
 
             <div>
-              <AmountSpentComponent amountSpent={p.amountSpent} />
+              <span className="text-orange-200">
+                <span className="font-semibold text-cyan-400">
+                  Amount Spent:{" "}
+                </span>
+                {p.amountSpent * 215232} ₹
+              </span>
             </div>
           </div>
         ))}
