@@ -20,6 +20,7 @@
     "react-dom": "19.0.0-rc-69d4b800-20241021",
     "react-hot-toast": "^2.4.1",
     "react-lottie": "^1.2.4",
+    "wagmi": "^2.12.25",
     "zustand": "^5.0.1"
   },
   "devDependencies": {
