@@ -15,6 +15,7 @@ export const TransactionProvider = ({ children }) => {
   const [isLotteryOpen, setIsLotteryOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // New isLoading state
   const [participantCount, setParticipantCount] = useState("0");
+  const [amountInvested, setamountInvested] = useState(0);
   const { setWinners } = useWinnerStore();
   const { participants, setParticipants } = useParticipantsStore();
 
@@ -294,6 +295,14 @@ export const TransactionProvider = ({ children }) => {
     init();
   }, []);
 
+  const getAmount = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+    const amount = await contract.getTotalAmountInvested();
+    setamountInvested(ethers.utils.formatEther(amount));
+  };
+
   return (
     <TransactionContext.Provider
       value={{
@@ -313,8 +322,10 @@ export const TransactionProvider = ({ children }) => {
         closeLottery,
         participantCount,
         getParticipantCount,
+        amountInvested,
         getWinner,
-        isLoading, // Include isLoading in context value
+        isLoading,
+        getAmount, // Include isLoading in context value
       }}
     >
       {children}

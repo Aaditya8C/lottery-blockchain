@@ -55,6 +55,8 @@ const DashboardComp = () => {
     closeLottery,
     participantCount,
     getParticipantCount,
+    amountInvested,
+    getAmount,
   } = useContext(TransactionContext);
 
   const { setWinners } = useWinnerStore();
@@ -69,6 +71,10 @@ const DashboardComp = () => {
   useEffect(() => {
     getParticipantCount();
   }, [participantCount]);
+
+  useEffect(() => {
+    getAmount();
+  }, [amountInvested]);
 
   return (
     <div>
@@ -102,6 +108,10 @@ const DashboardComp = () => {
                   <div className="flex justify-between gap-10 text-white font-semibold">
                     <p>Total Participants:</p>
                     <p>{participantCount}</p>
+                  </div>
+                  <div className="flex justify-between gap-10 text-white font-semibold">
+                    <p>Total Amount Invested:</p>
+                    <p>{amountInvested}</p>
                   </div>
                 </div>
 
