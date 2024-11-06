@@ -9,7 +9,7 @@ const Navbar = () => {
   return (
     <div className="p-6 flex items-center justify-between shadow-xl shadow-cyan-900 px-28 bg-cyan-950">
       <Link className="text-cyan-500 font-bold text-xl" href="/dashboard">
-        Maal ka Mela
+        EtherRaja
       </Link>
       <Link className="text-cyan-500 font-bold text-xl" href="/participants">
         Participants

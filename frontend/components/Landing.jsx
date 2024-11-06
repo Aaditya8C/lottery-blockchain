@@ -23,8 +23,8 @@ const Landing = () => {
 
   return (
     <div className="flex flex-col justify-center items-center py-20">
-      <p className="text-gray-400 text-4xl font-semibold animate-pulse">
-        The Maal ka <span className="text-cyan-300">Mela</span>
+      <p className="text-cyan-300 text-4xl font-semibold animate-pulse">
+        EtherRaja
       </p>
       <div>
         <Lottie options={defaultOptions} height={400} width={400} />
